@@ -6,8 +6,6 @@ from backend.app.api.v1.stt_route import router as stt_router
 from app.settings.config import API_Settings
 
 settings = API_Settings()
-print(settings.yandex_api)
-
 
 app = FastAPI(title="Voice to Route API",
             docs_url="/api/openapi",
@@ -29,7 +27,6 @@ app.include_router(stt_router, prefix="/api", tags=["STT Route"])
 def health_check():
     """A simple health check endpoint."""
     return {"ok": True}
-
 
 if __name__ == "__main__":
     uvicorn.run(

@@ -1,30 +1,30 @@
 import os
+import tempfile
 import uuid
 import shutil
-from typing import List
 from fastapi import APIRouter, UploadFile, File
-from pydantic import BaseModel
 
 from app.services.stt import mock_stt
 from app.services.routing import mock_2gis_route
+from app.api.v1.stt.schemas import SttRouteResponse
 
 router = APIRouter()
-
-class SttRouteResponse(BaseModel):
-    transcript: str
-    route: List[List[float]]
 
 @router.post("/stt-route", response_model=SttRouteResponse)
 async def stt_route_endpoint(audio: UploadFile = File(...)):
     """
     Receives an audio file, mocks STT and routing, and returns the result.
     """
-    # Use a temporary file to store the uploaded audio
-    temp_path = f"/tmp/{uuid.uuid4()}-{audio.filename}"
-    try:
+    
+    # Create a temporary file that works on all OS
+    with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(audio.filename)[1]) as temp_file:
+        temp_path = temp_file.name
+        
+        # Save the uploaded audio to temporary file
         with open(temp_path, "wb") as buffer:
             shutil.copyfileobj(audio.file, buffer)
 
+    try:
         # 1. Mock Speech-to-Text
         transcript = mock_stt(temp_path)
 
