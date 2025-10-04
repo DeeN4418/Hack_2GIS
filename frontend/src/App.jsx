@@ -216,7 +216,7 @@ const AppContent = () => {
                     </pre>
                 )}
                 
-                {response?.route && <Map />}
+                {response?.route && <Map route={response.route} />}
             </div>
         </div>
     );
