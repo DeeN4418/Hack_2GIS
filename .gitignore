@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+.pytest_cache/
+.mypy_cache/
+htmlcov/
+*.egg-info/
+dist/
+build/
+*.so
+
+# Environments
+.env
+.env.local
+.env.*.local
+
+# IDEs and editors
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+
+# JavaScript / Node / React
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+build/
+dist/
+coverage/
+
+# Misc
+.tmp/
+*.tmp
+*.log
