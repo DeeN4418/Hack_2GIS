@@ -62,11 +62,11 @@ async def stt_route_endpoint(
             raise HTTPException(
                 status_code=404, detail="Could not find locations in the transcript."
             )
+        
+        # Geocode the locations to get coordinates, using user_location as the city context.
+        points_to_route = await geocode_locations(location_names, city="Moscow")
 
-        # 3. Geocode location names to coordinates
-        points_to_route = await geocode_locations(location_names)
-
-        # 4. Build a real route using 2GIS API
+        # Get route from 2GIS API
         route_coords = await get_2gis_route(points_to_route)
 
         # 5. Format for frontend

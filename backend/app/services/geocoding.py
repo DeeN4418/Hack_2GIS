@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import List
+from typing import List, Optional
 import httpx
 from fastapi import HTTPException
 import asyncio
@@ -21,15 +21,18 @@ def mock_llm_geocoding(text: str) -> List[str]:
     return ["2гис офис", "Москва-сити"]
 
 
-async def _geocode_one_location(location: str, client: httpx.AsyncClient) -> List[float]:
+async def _geocode_one_location(location: str, client: httpx.AsyncClient, city: Optional[str] = None) -> List[float]:
     """
     Geocodes a single location string to coordinates using 2GIS Places API.
     Helper for geocode_locations.
     """
     try:
+        search_query = f"{city}, {location}" if city else location
+        params = {"q": search_query, "key": API_KEY, "fields": "items.point"}
+        
         response = await client.get(
             PLACES_API_URL,
-            params={"q": location, "key": API_KEY, "fields": "items.point", "region_id": "32"},  # Moscow region
+            params=params,
             timeout=10.0
         )
         response.raise_for_status()
@@ -59,11 +62,11 @@ async def _geocode_one_location(location: str, client: httpx.AsyncClient) -> Lis
         raise HTTPException(status_code=500, detail=error_detail)
 
 
-async def geocode_locations(locations: List[str]) -> List[List[float]]:
+async def geocode_locations(locations: List[str], city: Optional[str] = None) -> List[List[float]]:
     """
     Geocodes a list of location strings to a list of coordinates.
     """
     async with httpx.AsyncClient() as client:
-        tasks = [_geocode_one_location(loc, client) for loc in locations]
+        tasks = [_geocode_one_location(loc, client, city=city) for loc in locations]
         coordinates = await asyncio.gather(*tasks)
         return coordinates
