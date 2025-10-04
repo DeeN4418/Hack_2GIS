@@ -22,11 +22,6 @@ dist/
 build/
 *.so
 
-# Environments
-.env
-.env.local
-.env.*.local
-
 # IDEs and editors
 .idea/
 .vscode/

@@ -1,9 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import uvicorn
 
-from app.api.stt_route import router as stt_router
+from backend.app.api.v1.stt.stt_route import router as stt_router
 
-app = FastAPI(title="Voice to Route API")
+app = FastAPI(title="Voice to Route API",
+            docs_url="/api/openapi",
+            openapi_url="/api/openapi.json")
 
 # Configure CORS
 app.add_middleware(
@@ -21,3 +24,12 @@ app.include_router(stt_router, prefix="/api", tags=["STT Route"])
 def health_check():
     """A simple health check endpoint."""
     return {"ok": True}
+
+
+if __name__ == "__main__":
+    uvicorn.run(
+        "main:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=True
+    )
