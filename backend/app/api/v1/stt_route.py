@@ -1,4 +1,5 @@
 import os
+import tempfile
 import uuid
 import shutil
 from fastapi import APIRouter, UploadFile, File, Cookie
@@ -8,6 +9,10 @@ from typing import List, Optional
 from app.services.stt import mock_stt
 from app.services.geocoding import mock_llm_geocoding, geocode_locations
 from app.services.routing import get_2gis_route
+from fastapi import APIRouter, UploadFile, File
+
+from app.services.stt import mock_stt
+from app.api.v1.stt.schemas import SttRouteResponse
 
 router = APIRouter()
 
@@ -28,18 +33,18 @@ async def stt_route_endpoint(
     and returns the result.
     It also reads the user's location from the cookie if available.
     """
-    if user_location:
-        print(f"User location from cookie: {user_location}")
-        # Here you could parse it and use it:
-        # lon, lat = map(float, user_location.split(':'))
-
-    temp_path = f"/tmp/{uuid.uuid4()}-{audio.filename}"
-    try:
+    
+    # Create a temporary file that works on all OS
+    with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(audio.filename)[1]) as temp_file:
+        temp_path = temp_file.name
+        
+        # Save the uploaded audio to temporary file
         with open(temp_path, "wb") as buffer:
             shutil.copyfileobj(audio.file, buffer)
 
+    try:
         # 1. Mock Speech-to-Text
-        transcript = mock_stt(temp_path)
+        transcript = await mock_stt(temp_path)
 
         # 2. Mock LLM to get location names
         location_names = mock_llm_geocoding(transcript)

@@ -82,9 +82,25 @@ const AppContent = () => {
         setStatus('Запрос доступа к микрофону...');
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
-                ? 'audio/webm;codecs=opus' : 'audio/webm';
-            
+            const preferredMimeTypes = [
+                'audio/wav',
+                'audio/mpeg', // .mp3
+                'audio/ogg',
+                'audio/flac',
+                'audio/mp4', // .m4a
+                'audio/aac',
+                'audio/webm;codecs=opus', // Fallback
+                'audio/webm', // Fallback
+            ];
+
+            const mimeType = preferredMimeTypes.find(type => MediaRecorder.isTypeSupported(type));
+
+            if (!mimeType) {
+                setStatus('Ни один из аудиоформатов не поддерживается для записи.');
+                setRecordingState('idle');
+                return;
+            }
+
             mediaRecorderRef.current = new MediaRecorder(stream, { mimeType });
             audioChunksRef.current = [];
 
@@ -116,7 +132,11 @@ const AppContent = () => {
 
     const sendData = async (audioBlob) => {
         const formData = new FormData();
-        formData.append('audio', audioBlob, 'speech.webm');
+        const mimeType = mediaRecorderRef.current.mimeType;
+        let extension = mimeType.split('/')[1].split(';')[0];
+        if (extension === 'mpeg') extension = 'mp3';
+        if (extension === 'mp4' || extension === 'x-m4a') extension = 'm4a';
+        formData.append('audio', audioBlob, `speech.${extension}`);
         
         try {
             const res = await fetch(`${API_URL}/stt-route`, { method: 'POST', body: formData });
