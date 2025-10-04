@@ -61,6 +61,12 @@ async def stt_route_endpoint(
         # The result from the crew is now a Pydantic model (Itinerary).
         # We need to access the 'locations' attribute to get the list.
         location_names = crew_result.json_dict['locations']
+        current_location = crew_result.json_dict['current_location']
+        if current_location == "Unknown":
+            raise HTTPException(
+                status_code=404, detail="Could not find current location in the transcript."
+            )
+
 
         if not location_names:
             raise HTTPException(
@@ -68,7 +74,7 @@ async def stt_route_endpoint(
             )
         
         # Geocode the locations to get coordinates, using user_location as the city context.
-        points_to_route = await geocode_locations(location_names, city="Moscow")
+        points_to_route = await geocode_locations(location_names, city=current_location)
 
         # Get route from 2GIS API
         route_coords = await get_2gis_route(points_to_route)
