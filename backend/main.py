@@ -1,3 +1,9 @@
+import sys
+import os
+
+# Add the route_planner_agent to the python path
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'route_planner_agent', 'src'))
+
 import uvicorn
 
 from fastapi import FastAPI

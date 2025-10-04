@@ -1,13 +1,16 @@
 import os
 import uuid
 import shutil
-from fastapi import APIRouter, UploadFile, File, Cookie
+from fastapi import APIRouter, UploadFile, File, Cookie, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional
 
 from app.services.stt import mock_stt
 from app.services.geocoding import mock_llm_geocoding, geocode_locations
 from app.services.routing import get_2gis_route
+from app.services.stt import mock_stt
+from route_planner_agent.crew import RoutePlannerAgent
+
 
 router = APIRouter()
 
@@ -38,11 +41,27 @@ async def stt_route_endpoint(
         with open(temp_path, "wb") as buffer:
             shutil.copyfileobj(audio.file, buffer)
 
-        # 1. Mock Speech-to-Text
+        # Perform speech-to-text conversion
         transcript = mock_stt(temp_path)
+        os.remove(temp_path)
 
-        # 2. Mock LLM to get location names
-        location_names = mock_llm_geocoding(transcript)
+        if not transcript:
+            raise HTTPException(
+                status_code=400, detail="Could not understand audio."
+            )
+
+        # Use the crew to get location names
+        inputs = {'location': transcript}
+        crew_result = RoutePlannerAgent().crew().kickoff(inputs=inputs)
+        
+        # The result from the crew is now a Pydantic model (Itinerary).
+        # We need to access the 'locations' attribute to get the list.
+        location_names = crew_result.json_dict['locations']
+
+        if not location_names:
+            raise HTTPException(
+                status_code=404, detail="Could not find locations in the transcript."
+            )
 
         # 3. Geocode location names to coordinates
         points_to_route = await geocode_locations(location_names)
