@@ -1,9 +1,9 @@
 import os
 import uuid
 import shutil
-from fastapi import APIRouter, UploadFile, File
+from fastapi import APIRouter, UploadFile, File, Cookie
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 
 from app.services.stt import mock_stt
 from app.services.geocoding import mock_llm_geocoding, geocode_locations
@@ -19,11 +19,20 @@ class SttRouteResponse(BaseModel):
     route: List[RoutePoint]
 
 @router.post("/stt-route", response_model=SttRouteResponse)
-async def stt_route_endpoint(audio: UploadFile = File(...)):
+async def stt_route_endpoint(
+    audio: UploadFile = File(...),
+    user_location: Optional[str] = Cookie(None)
+):
     """
-    Receives an audio file, mocks STT, gets location names,
-    geocodes them via 2GIS Places API, builds a real route, and returns the result.
+    Receives an audio file, mocks STT, geocodes text to points,
+    and returns the result.
+    It also reads the user's location from the cookie if available.
     """
+    if user_location:
+        print(f"User location from cookie: {user_location}")
+        # Here you could parse it and use it:
+        # lon, lat = map(float, user_location.split(':'))
+
     temp_path = f"/tmp/{uuid.uuid4()}-{audio.filename}"
     try:
         with open(temp_path, "wb") as buffer:

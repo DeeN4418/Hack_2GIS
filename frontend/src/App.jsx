@@ -28,7 +28,45 @@ const AppContent = () => {
     const mediaRecorderRef = useRef(null);
     const audioChunksRef = useRef([]);
 
-    const API_URL = 'http://localhost:8000/api/stt-route';
+    const API_URL = 'http://localhost:8000/api';
+
+    // Get and send user's location on initial load
+    useEffect(() => {
+        if ("geolocation" in navigator) {
+            setStatus("Запрашиваем геолокацию...");
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    sendLocationToBackend({ lat: latitude, lon: longitude });
+                },
+                (error) => {
+                    console.error("Geolocation error:", error);
+                    setStatus("Не удалось определить геолокацию.");
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 5000, // 5 seconds
+                    maximumAge: 0
+                }
+            );
+        } else {
+            setStatus("Геолокация не поддерживается вашим браузером.");
+        }
+    }, []); // Empty array ensures this runs only once on mount
+
+    const sendLocationToBackend = async (location) => {
+        try {
+            await fetch(`${API_URL}/user-location`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(location),
+            });
+            setStatus('Геолокация сохранена. Нажмите для записи.');
+        } catch (error) {
+            console.error('Failed to send location:', error);
+            setStatus('Ошибка при отправке геолокации.');
+        }
+    };
 
     // Main recording flow logic
     const handleRecordClick = () => {
@@ -81,7 +119,7 @@ const AppContent = () => {
         formData.append('audio', audioBlob, 'speech.webm');
         
         try {
-            const res = await fetch(API_URL, { method: 'POST', body: formData });
+            const res = await fetch(`${API_URL}/stt-route`, { method: 'POST', body: formData });
             if (!res.ok) throw new Error(`Ошибка сети: ${res.status}`);
             
             const data = await res.json();

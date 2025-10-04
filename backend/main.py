@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.stt_route import router as stt_router
+from app.api.user_location import router as location_router
 
 app = FastAPI(title="Voice to Route API")
 
@@ -18,6 +19,8 @@ app.add_middleware(
 
 # Include API routers
 app.include_router(stt_router, prefix="/api", tags=["STT Route"])
+app.include_router(location_router, prefix="/api", tags=["User Location"])
+
 
 @app.get("/health", tags=["Health Check"])
 def health_check():
