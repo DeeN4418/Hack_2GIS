@@ -6,14 +6,14 @@ from fastapi import APIRouter, UploadFile, File, Cookie, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional
 
-from app.services.stt import mock_stt
-from app.services.geocoding import mock_llm_geocoding, geocode_locations
-from app.services.routing import get_2gis_route
+from backend.app.services.stt import mock_stt
+from backend.app.services.geocoding import mock_llm_geocoding, geocode_locations
+from backend.app.services.routing import get_2gis_route
 from fastapi import APIRouter, UploadFile, File
 
-from app.services.stt import mock_stt
-from app.api.v1.stt.schemas import SttRouteResponse
-from app.services.stt import mock_stt
+from backend.app.services.stt import mock_stt
+from backend.app.api.v1.stt.schemas import SttRouteResponse
+from backend.app.services.stt import mock_stt
 from route_planner_agent.crew import RoutePlannerAgent
 
 

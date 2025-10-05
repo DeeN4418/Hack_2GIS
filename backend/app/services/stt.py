@@ -3,7 +3,7 @@ import os
 import urllib
 import urllib.request
 import logging
-from app.settings.config import API_Settings
+from backend.app.settings.config import API_Settings
 import aiofiles
 import httpx
 from io import BytesIO
