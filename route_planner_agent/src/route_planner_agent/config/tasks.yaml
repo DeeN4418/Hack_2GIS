@@ -1,3 +1,44 @@
 plan_trip:
   description: 'Identify the current city from the input {location} and create a list of must-visit places for today for a tourist there. The list should be in an optimal order based on their location. The final answer must be a structured JSON object with the current location and a list of Russian location names.'
   expected_output: 'A JSON object with two keys: "current_location" which contains the name of the city, and "locations" which contains a list of strings representing the Russian names of the places/attractions.'
+
+#extract_task:
+#  description: >
+#    1. Carefully analyze the {text}. Extract ALL the places visited:
+#
+#        Places with names: "Blackbeard coffee shop", "Horizon cinema"
+#    Places by type: "pharmacy", "bank", "flower shop"
+#    If the address is specified along with the type/name → use ONLY the address
+#        Places from the events: "meeting at the pizzeria" → pizzeria
+#        Public spaces: "walk along the embankment", "Central Park"
+#    Household tasks: "pick up from dry cleaning" → dry cleaning
+#
+#    2. Determine the time of the visit for EACH place.:
+#
+#      Explicit instructions: "11", "15:30", " eight o'clock in the evening",  etc.
+#    If the time is not specified or unclear or if it is relative time → set None
+#      If the time is written in letters, convert it to numbers.
+#
+#    3. CRITICALLY IMPORTANT:
+#
+#      If you have an address, use ONLY the address, without the type/name of the place.
+#      Don't skip places without explicit names.
+#      Location type is a sufficient criterion for inclusion
+#      Divide the composite places into separate ones
+#      Use only explicit instructions for the time.
+#
+#    4. OUTPUT FORMAT:
+#        ONLY a JSON dictionary in the format: {"place": "time"}
+#        Where "place" is a string with the address (if specified) or the name/type of the place.,
+#        and "time" is a string with an explicit time or None.
+#
+#    5. Output example:
+#        {
+#    "Lenin St., 15": "in the morning",
+#    "Flower shop": "in the afternoon",
+#    "Kirova St., 22": null,
+#    "Barbershop Men's format": "15:00"
+#    }
+#  expected_output: >
+#    list in russian
+#  agent: extracter

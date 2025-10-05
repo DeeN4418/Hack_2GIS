@@ -10,9 +10,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
-from app.api.user_location import router as location_router
+from backend.app.api.user_location import router as location_router
 from backend.app.api.v1.stt_route import router as stt_router
-from app.settings.config import API_Settings
+from backend.app.settings.config import API_Settings
 
 settings = API_Settings()
 
