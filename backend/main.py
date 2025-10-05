@@ -3,6 +3,7 @@ import os
 
 # Add the route_planner_agent to the python path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'route_planner_agent', 'src'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'tourist_route_planner', 'src'))
 
 import uvicorn
 
@@ -12,6 +13,7 @@ import uvicorn
 
 from backend.app.api.user_location import router as location_router
 from backend.app.api.v1.stt_route import router as stt_router
+from backend.app.api.v1.stt_route_tourist import router as stt_route_tourist_router
 from backend.app.settings.config import API_Settings
 
 settings = API_Settings()
@@ -31,6 +33,7 @@ app.add_middleware(
 
 # Include API routers
 app.include_router(stt_router, prefix="/api", tags=["STT Route"])
+app.include_router(stt_route_tourist_router, prefix="/api", tags=["STT Route Tourist"])
 app.include_router(location_router, prefix="/api", tags=["User Location"])
 
 

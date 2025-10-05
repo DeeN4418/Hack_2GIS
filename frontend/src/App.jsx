@@ -21,11 +21,11 @@ const AppContent = () => {
     const [status, setStatus] = useState('Нажмите на микрофон для записи');
     const [recordingState, setRecordingState] = useState('idle'); // idle, recording, sending
     const [response, setResponse] = useState(null);
+    const [isTouristMode, setIsTouristMode] = useState(false);
     
     const [mapState] = useContext(MapContext);
     const { mapInstance, mapglAPI } = mapState;
     const directionsRef = useRef(null);
-    const routeObjectsRef = useRef([]);
 
     const mediaRecorderRef = useRef(null);
     const audioChunksRef = useRef([]);
@@ -140,8 +140,10 @@ const AppContent = () => {
         if (extension === 'mp4' || extension === 'x-m4a') extension = 'm4a';
         formData.append('audio', audioBlob, `speech.${extension}`);
         
+        const endpoint = isTouristMode ? '/stt-route-tourist' : '/stt-route';
+
         try {
-            const res = await fetch(`${API_URL}/stt-route`, { method: 'POST', body: formData });
+            const res = await fetch(`${API_URL}${endpoint}`, { method: 'POST', body: formData });
             if (!res.ok) throw new Error(`Ошибка сети: ${res.status}`);
             
             const data = await res.json();
@@ -164,71 +166,40 @@ const AppContent = () => {
     }, [mapInstance, mapglAPI]);
 
     useEffect(() => {
-        // Clear previous routes from both systems
         if (directionsRef.current) {
             directionsRef.current.clear();
         }
-        if (routeObjectsRef.current.length > 0) {
-            routeObjectsRef.current.forEach(obj => obj.destroy());
-            routeObjectsRef.current = [];
-        }
 
-        if (mapInstance && response?.route && response.route.length > 1) {
-            if (response.route_type === 'pedestrian' && directionsRef.current) {
-                const routeCoords = response.pivot_route_points.map(point => point.coord);
+        if (mapInstance && response?.pivot_route_points && response.pivot_route_points.length > 1 && directionsRef.current) {
+            const routeCoords = response.pivot_route_points.map(point => point.coord);
+            const style = { routeLineWidth: 5 };
+
+            if (response.route_type === 'pedestrian') {
                 directionsRef.current.pedestrianRoute({
                     points: routeCoords,
-                    style: {
-                        routeLineWidth: 5,
-                    }
+                    style: style,
                 });
-            } else if (mapglAPI) { // Handle segmented route
-                const segments = response.route;
-                const newRouteObjects = [];
-                segments.forEach((segment, i) => {
-                    const zIndex = segments.length - 1 - i;
-                    const polyline = new mapglAPI.Polyline(mapInstance, {
-                        coordinates: segment.coords,
-                        width: 5,
-                        color: segment.color,
-                        width2: 9,
-                        color2: '#ffffff',
-                        zIndex,
-                    });
-                    newRouteObjects.push(polyline);
-
-                    if (segment.label) {
-                        const isFirstPoint = i === 0;
-                        const lastPointIndex = segment.coords.length - 1;
-                        const coords = isFirstPoint ? segment.coords[0] : segment.coords[lastPointIndex];
-
-                        const circle = new mapglAPI.CircleMarker(mapInstance, {
-                            coordinates: coords,
-                            radius: 16,
-                            color: '#0088ff',
-                            strokeWidth: 2,
-                            strokeColor: '#ffffff',
-                            zIndex: isFirstPoint ? 5 : 3,
-                        });
-                        newRouteObjects.push(circle);
-
-                        const label = new mapglAPI.Label(mapInstance, {
-                            coordinates: coords,
-                            text: segment.label,
-                            fontSize: 14,
-                            color: '#ffffff',
-                            zIndex: isFirstPoint ? 6 : 4,
-                        });
-                        newRouteObjects.push(label);
-                    }
+            } else { // Handle other route types as car route
+                directionsRef.current.carRoute({
+                    points: routeCoords,
+                    style: style,
                 });
-                routeObjectsRef.current = newRouteObjects;
             }
         }
-    }, [mapInstance, mapglAPI, response]);
+    }, [mapInstance, response]);
 
     return (
         <div className="container">
+            <div className="tourist-mode-toggle">
+                <label>
+                    <input 
+                        type="checkbox" 
+                        checked={isTouristMode} 
+                        onChange={() => setIsTouristMode(!isTouristMode)} 
+                    />
+                    Tourist Mode
+                </label>
+            </div>
             <div className="main-content">
                 <h1>{recordingState === 'recording' ? 'Говорите...' : 'Нажмите для начала'}</h1>
                 <button

@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 settings = API_Settings()
 
-async def mock_stt(audio_path: str) -> str:
+async def stt(audio_path: str) -> str:
     """
     Converts an audio file to text using Yandex SpeechKit.
     The audio is converted to OGG (Opus) format before sending.

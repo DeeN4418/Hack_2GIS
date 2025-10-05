@@ -1,0 +1,3 @@
+plan_trip:
+  description: 'Identify the current city from the input {location} and create a list of must-visit places for today for a tourist there. The list should be in an optimal order based on their location. The final answer must be a structured JSON object with the current location and a list of Russian location names.'
+  expected_output: 'A JSON object with two keys: "current_location" which contains the name of the city, and "locations" which contains a list of strings representing the Russian names of the places/attractions.'
