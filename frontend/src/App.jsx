@@ -190,15 +190,19 @@ const AppContent = () => {
 
     return (
         <div className="container">
-            <div className="tourist-mode-toggle">
-                <label>
-                    <input 
-                        type="checkbox" 
-                        checked={isTouristMode} 
-                        onChange={() => setIsTouristMode(!isTouristMode)} 
-                    />
-                    Tourist Mode
-                </label>
+            <div className="profile-selector">
+                <button 
+                    className={!isTouristMode ? 'active' : ''} 
+                    onClick={() => setIsTouristMode(false)}
+                >
+                    General
+                </button>
+                <button 
+                    className={isTouristMode ? 'active' : ''} 
+                    onClick={() => setIsTouristMode(true)}
+                >
+                    Tourist
+                </button>
             </div>
             <div className="main-content">
                 <h1>{recordingState === 'recording' ? 'Говорите...' : 'Нажмите для начала'}</h1>

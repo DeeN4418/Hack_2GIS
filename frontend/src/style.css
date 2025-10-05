@@ -129,23 +129,31 @@ h1 {
     border: 1px solid #333;
 }
 
-.tourist-mode-toggle {
+.profile-selector {
     position: absolute;
     top: 20px;
     right: 20px;
-    background-color: rgba(255, 255, 255, 0.8);
-    padding: 10px;
-    border-radius: 8px;
-    z-index: 1000;
-    font-family: sans-serif;
-}
-
-.tourist-mode-toggle label {
+    background-color: var(--surface-color);
+    border-radius: 20px;
     display: flex;
-    align-items: center;
-    cursor: pointer;
+    padding: 4px;
+    z-index: 1000;
+    border: 1px solid #333;
 }
 
-.tourist-mode-toggle input {
-    margin-right: 8px;
+.profile-selector button {
+    background-color: transparent;
+    border: none;
+    color: var(--secondary-text-color);
+    padding: 8px 16px;
+    border-radius: 16px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.profile-selector button.active {
+    background-color: #3e3e3e;
+    color: var(--primary-text-color);
 }
