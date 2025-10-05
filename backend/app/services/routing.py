@@ -3,13 +3,13 @@ import httpx
 from typing import List
 from fastapi import HTTPException
 import logging
+from backend.app.settings.config import API_Settings
+
+settings = API_Settings()
 
 # Configure logging
 logger = logging.getLogger(__name__)
 
-# It's better to store the API key in an environment variable
-API_KEY = os.getenv("2GIS_API_KEY", "95138e17-59ca-426b-9a4b-2f5a9c36695a")
-ROUTING_API_URL = "https://routing.api.2gis.com/routing/7.0.0/global"
 MAX_ROUTE_POINTS = 10
 
 def _parse_linestring(linestring: str) -> List[List[float]]:
@@ -43,8 +43,8 @@ async def get_2gis_route(points: List[List[float]]) -> List[List[float]]:
     async with httpx.AsyncClient() as client:
         try:
             response = await client.post(
-                ROUTING_API_URL,
-                params={"key": API_KEY},
+                settings.routing_api_url,
+                params={"key": settings.gis_key},
                 json=payload,
                 timeout=10.0
             )

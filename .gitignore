@@ -21,6 +21,8 @@ htmlcov/
 dist/
 build/
 *.so
+ffmpeg/
+
 
 # IDEs and editors
 .idea/

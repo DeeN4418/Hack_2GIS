@@ -1,12 +1,7 @@
 from fastapi import APIRouter, Response
-from pydantic import BaseModel
-from typing import Optional
+from app.api.v1.schemas import UserLocation
 
 router = APIRouter()
-
-class UserLocation(BaseModel):
-    lat: float
-    lon: float
 
 @router.post("/user-location")
 def set_user_location(location: UserLocation, response: Response):
