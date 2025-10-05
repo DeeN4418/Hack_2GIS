@@ -8,7 +8,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 # It's better to store the API key in an environment variable
-API_KEY = os.getenv("2GIS_API_KEY", "95138e17-59ca-426b-9a4b-2f5a9c36695a")
+API_KEY = os.getenv("2GIS_API_KEY", "28d221a8-de07-4498-8136-3b345e2e4b99")
 ROUTING_API_URL = "https://routing.api.2gis.com/routing/7.0.0/global"
 MAX_ROUTE_POINTS = 10
 

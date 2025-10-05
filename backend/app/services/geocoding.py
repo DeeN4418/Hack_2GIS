@@ -8,7 +8,7 @@ import asyncio
 # Configure logging
 logger = logging.getLogger(__name__)
 
-API_KEY = os.getenv("2GIS_API_KEY", "95138e17-59ca-426b-9a4b-2f5a9c36695a")
+API_KEY = os.getenv("2GIS_API_KEY", "28d221a8-de07-4498-8136-3b345e2e4b99")
 PLACES_API_URL = "https://catalog.api.2gis.com/3.0/items"
 
 

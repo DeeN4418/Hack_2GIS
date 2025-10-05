@@ -4,7 +4,7 @@ import MapWrapper from './MapWrapper';
 import { MapContext } from './MapContext';
 
 const Map = ({ route }) => {
-    const [, setMapInstance] = useContext(MapContext);
+    const [, setMapState] = useContext(MapContext);
 
     useEffect(() => {
         let map;
@@ -15,18 +15,18 @@ const Map = ({ route }) => {
             map = new mapglAPI.Map('map-container', {
                 center: firstPoint.coord,
                 zoom: 14,
-                key: 'e50d3992-8076-47d8-bc3c-9add5a142f20', // YOUR_2GIS_API_KEY
+                key: import.meta.env.VITE_2GIS_API_KEY,
             });
-            setMapInstance(map);
+            setMapState({ mapInstance: map, mapglAPI: mapglAPI });
         });
 
         return () => {
             if (map) {
                 map.destroy();
-                setMapInstance(undefined);
+                setMapState({ mapInstance: undefined, mapglAPI: undefined });
             }
         };
-    }, [route, setMapInstance]);
+    }, [route, setMapState]);
 
     return (
         <div style={{ width: '100%', height: '400px' }}>

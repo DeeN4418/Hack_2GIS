@@ -1,12 +1,15 @@
 import React, { createContext, useState } from 'react';
 
-export const MapContext = createContext([undefined, () => {}]);
+export const MapContext = createContext([{}, () => {}]);
 
 export const MapProvider = (props) => {
-    const [mapInstance, setMapInstance] = useState();
+    const [mapState, setMapState] = useState({
+        mapInstance: undefined,
+        mapglAPI: undefined,
+    });
 
     return (
-        <MapContext.Provider value={[mapInstance, setMapInstance]}>
+        <MapContext.Provider value={[mapState, setMapState]}>
             {props.children}
         </MapContext.Provider>
     );

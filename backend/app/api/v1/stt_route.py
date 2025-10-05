@@ -23,8 +23,10 @@ class RoutePoint(BaseModel):
     coord: List[float]
 
 class SttRouteResponse(BaseModel):
+    route_type: str
     transcript: str
     route: List[RoutePoint]
+    pivot_route_points: List[RoutePoint]
 
 @router.post("/stt-route", response_model=SttRouteResponse)
 async def stt_route_endpoint(
@@ -81,10 +83,13 @@ async def stt_route_endpoint(
 
         # 5. Format for frontend
         route_for_frontend = [{"coord": c} for c in route_coords]
+        pivot_route_points = [{"coord": c} for c in points_to_route]
 
         return {
+            "route_type": "pedestrian",
             "transcript": transcript,
             "route": route_for_frontend,
+            "pivot_route_points": pivot_route_points
         }
     finally:
         if os.path.exists(temp_path):
