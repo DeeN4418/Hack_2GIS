@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
-import { load } from '@2gis/mapgl';
+import '@2gis/mapgl-directions';
 import Map from './Map';
 import { MapContext, MapProvider } from './MapContext';
 
@@ -22,7 +22,9 @@ const AppContent = () => {
     const [recordingState, setRecordingState] = useState('idle'); // idle, recording, sending
     const [response, setResponse] = useState(null);
     
-    const [mapInstance] = useContext(MapContext);
+    const [mapState] = useContext(MapContext);
+    const { mapInstance, mapglAPI } = mapState;
+    const directionsRef = useRef(null);
     const routeObjectsRef = useRef([]);
 
     const mediaRecorderRef = useRef(null);
@@ -153,47 +155,77 @@ const AppContent = () => {
         }
     };
 
-    // Effect to draw the route on the map
     useEffect(() => {
+        if (mapInstance && mapglAPI && !directionsRef.current) {
+            directionsRef.current = new mapglAPI.Directions(mapInstance, {
+                directionsApiKey: import.meta.env.VITE_2GIS_API_KEY,
+            });
+        }
+    }, [mapInstance, mapglAPI]);
+
+    useEffect(() => {
+        // Clear previous routes from both systems
+        if (directionsRef.current) {
+            directionsRef.current.clear();
+        }
         if (routeObjectsRef.current.length > 0) {
             routeObjectsRef.current.forEach(obj => obj.destroy());
             routeObjectsRef.current = [];
         }
 
         if (mapInstance && response?.route && response.route.length > 1) {
-            const routeCoords = response.route.map(point => point.coord);
-            load().then(mapglAPI => {
+            if (response.route_type === 'pedestrian' && directionsRef.current) {
+                const routeCoords = response.pivot_route_points.map(point => point.coord);
+                directionsRef.current.pedestrianRoute({
+                    points: routeCoords,
+                    style: {
+                        routeLineWidth: 5,
+                    }
+                });
+            } else if (mapglAPI) { // Handle segmented route
+                const segments = response.route;
                 const newRouteObjects = [];
-                const polyline = new mapglAPI.Polyline(mapInstance, {
-                    coordinates: routeCoords,
-                    width: 10, color: '#28a745', width2: 14, color2: '#ffffff', zIndex: 1,
-                });
-                newRouteObjects.push(polyline);
-                
-                const startPoint = routeCoords[0];
-                const endPoint = routeCoords[routeCoords.length - 1];
-                
-                // Markers A & B
-                [startPoint, endPoint].forEach((point, index) => {
-                    const circle = new mapglAPI.CircleMarker(mapInstance, {
-                        coordinates: point, radius: 16, color: '#0088ff', strokeWidth: 2, strokeColor: '#ffffff', zIndex: 3,
+                segments.forEach((segment, i) => {
+                    const zIndex = segments.length - 1 - i;
+                    const polyline = new mapglAPI.Polyline(mapInstance, {
+                        coordinates: segment.coords,
+                        width: 5,
+                        color: segment.color,
+                        width2: 9,
+                        color2: '#ffffff',
+                        zIndex,
                     });
-                    newRouteObjects.push(circle);
-                    const label = new mapglAPI.Label(mapInstance, {
-                        coordinates: point, text: index === 0 ? 'A' : 'B', fontSize: 14, color: '#ffffff', zIndex: 4,
-                    });
-                    newRouteObjects.push(label);
+                    newRouteObjects.push(polyline);
+
+                    if (segment.label) {
+                        const isFirstPoint = i === 0;
+                        const lastPointIndex = segment.coords.length - 1;
+                        const coords = isFirstPoint ? segment.coords[0] : segment.coords[lastPointIndex];
+
+                        const circle = new mapglAPI.CircleMarker(mapInstance, {
+                            coordinates: coords,
+                            radius: 16,
+                            color: '#0088ff',
+                            strokeWidth: 2,
+                            strokeColor: '#ffffff',
+                            zIndex: isFirstPoint ? 5 : 3,
+                        });
+                        newRouteObjects.push(circle);
+
+                        const label = new mapglAPI.Label(mapInstance, {
+                            coordinates: coords,
+                            text: segment.label,
+                            fontSize: 14,
+                            color: '#ffffff',
+                            zIndex: isFirstPoint ? 6 : 4,
+                        });
+                        newRouteObjects.push(label);
+                    }
                 });
-                
                 routeObjectsRef.current = newRouteObjects;
-                const bounds = routeCoords.reduce((b, coord) => [
-                    [Math.min(b[0][0], coord[0]), Math.min(b[0][1], coord[1])],
-                    [Math.max(b[1][0], coord[0]), Math.max(b[1][1], coord[1])],
-                ], [[Infinity, Infinity], [-Infinity, -Infinity]]);
-                mapInstance.fitBounds(bounds, { padding: [50, 50, 50, 50] });
-            });
+            }
         }
-    }, [mapInstance, response]);
+    }, [mapInstance, mapglAPI, response]);
 
     return (
         <div className="container">

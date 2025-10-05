@@ -19,6 +19,18 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
+<<<<<<< HEAD
+=======
+class RoutePoint(BaseModel):
+    coord: List[float]
+
+class SttRouteResponse(BaseModel):
+    route_type: str
+    transcript: str
+    route: List[RoutePoint]
+    pivot_route_points: List[RoutePoint]
+
+>>>>>>> 76ff37f85a92f3aa305c5318e81083909ac3156c
 @router.post("/stt-route", response_model=SttRouteResponse)
 async def stt_route_endpoint(
     audio: UploadFile = File(...),
@@ -141,10 +153,13 @@ async def stt_route_endpoint(
 
         # 6. Format for frontend
         route_for_frontend = [{"coord": c} for c in route_coords]
+        pivot_route_points = [{"coord": c} for c in points_to_route]
 
         return {
+            "route_type": "pedestrian",
             "transcript": transcript,
             "route": route_for_frontend,
+            "pivot_route_points": pivot_route_points
         }
     except HTTPException:
         raise
